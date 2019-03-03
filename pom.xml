@@ -64,12 +64,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.1</version>
         <configuration>
-          <source>
-            ${maven.compiler.source}
-          </source>
-          <target>
-            ${maven.compiler.target}
-          </target>
+          <source>8</source>
+          <target>8</target>
           <compileSourceRoots>src/main/java</compileSourceRoots>
         </configuration>
       </plugin>

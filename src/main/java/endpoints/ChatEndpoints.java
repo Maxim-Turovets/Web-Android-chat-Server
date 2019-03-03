@@ -1,11 +1,16 @@
 package endpoints;
 
+        import coders.MessageDecoder;
+        import coders.MessageEncoder;
+        import entities.Message;
+
         import javax.websocket.*;
         import javax.websocket.server.ServerEndpoint;
+        import java.io.IOException;
         import java.util.LinkedList;
         import java.util.List;
 
-@ServerEndpoint(value = "/chat")
+@ServerEndpoint(value = "/chat",decoders = {MessageDecoder.class},encoders = {MessageEncoder.class})
 public class ChatEndpoints {
     private Session session=null;
     private  static List<Session> sessionList = new LinkedList<>();
@@ -29,5 +34,17 @@ public class ChatEndpoints {
     }
 
     @OnMessage
-    public  void  onMessage(Session session, String)
+    public  void  onMessage(Session session, Message msg)
+    {
+        sessionList.forEach(s->{
+            if(s==this.session) return;;
+            try {
+                s.getBasicRemote().sendObject(msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (EncodeException e) {
+                e.printStackTrace();
+            }
+        });
+    }
 }
