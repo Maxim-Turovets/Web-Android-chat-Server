@@ -10,6 +10,19 @@
     <title>Title</title>
 </head>
 <body>
-<h1>Test</h1>
+<div class="start">
+    <input type="text" class="username" placeholder="enter name">
+    <button id="start">start</button>
+</div>
+
+<div class="chatbox">
+    <div class="message">
+        <div class="msg">
+            <div class="from">vvv</div>
+            <div class="text">Hello</div>
+        </div>
+    </div>
+    <textarea class="msg" cols="30" rows="10"></textarea>
+</div>
 </body>
 </html>
