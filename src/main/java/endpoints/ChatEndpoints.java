@@ -20,7 +20,7 @@ public class ChatEndpoints {
     public  void onOpen (Session session)
     {
         counter++;
-        this.session= session;
+        this.session = session;
         sessionList.add(session);
     }
 
@@ -51,10 +51,18 @@ public class ChatEndpoints {
 //    }
 
     @OnMessage
-    public  void  onMessage(Session session,String str)
-    {
-        System.out.println("Session "+counter+" Message: "+str);
+    public  void  onMessage(Session session,String str) throws IOException {
+
+
+        for(int i = 0;i<sessionList.size();i++)
+        {
+            if(sessionList.get(i)==session)
+            continue;
+            else
+                sessionList.get(i).getBasicRemote().sendText(str);
+        }
     }
+
 
 
 

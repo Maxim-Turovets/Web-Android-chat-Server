@@ -149,10 +149,13 @@
 </head>
 <body>
 
+<style>.btn2{
+
+}
+</style>
 <div class="enter">
     <input type="text" class="inp">
-    <button class="btn">start</button>
-    <button class="btn2">connect</button>
+    <button class="btn2">Send</button>
 </div>
 </body>
 <script>
@@ -160,8 +163,16 @@
         const Btn = document.querySelector(".btn");
         const Btn2 = document.querySelector(".btn2");
         const Inp = document.querySelector(".inp");
+        const enter = document.querySelector(".enter");
         const con = new WebSocket("ws://127.0.0.1:8080/sock/chat");
+        let  mes = "";
         Btn2.addEventListener("click", e =>fun());
+
+        const writeLine = text => {
+            const line = document.createElement('div');
+            line.innerHTML = `<p>${text}</p>`;
+            enter.appendChild(line);
+        };
 
         con.onopen = () => {
         console.log('connected');
@@ -169,11 +180,21 @@
         con.onclose = () => {
         console.log('closed');
         };
+
         con.onmessage = event => {
-        console.log(event.data)};
+            writeLine(event.data);
+        };
 
         function  fun() {
         con.send(Inp.value);
+        create();
+        }
+
+        function create() {
+            const tr = document.createElement('div');
+            tr.innerHTML = mes;
+
+            document.querySelector(".enter").appendChild(tr);
         }
 
 
