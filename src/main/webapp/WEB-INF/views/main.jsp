@@ -62,10 +62,7 @@
 
 <div class="chatbox">
     <div class="message">
-        <div class="msg">
-            <textarea class="from" id="demo">MAx</textarea>
-            <textarea class="text">Hello</textarea>
-        </div>
+
     </div>
     <textarea class="area" cols="30" rows="10"></textarea>
 </div>
@@ -78,11 +75,55 @@
             this.startBtn = document.querySelector(".btn");
             this.nameInput = document.querySelector(".username");
             this.name = document.querySelector(".from");
+            this.chatContainer = this.chatbox.querySelector(".message");
             this.startBtn.addEventListener("click",e=>this.openSocket());
+            this.msgTextarea = document.querySelector(".area");
+            this.msgTextarea.addEventListener("keyup",e=>{
+                if(e.ctrlKey && e.keyCode===13)
+                {
+                    alert("Test");
+                    e.preventDefault();
+                    this.send(this.msgTextarea.value)
+                }
+            })
+        },
+        send(){
+            this.sendMessage(
+                {
+                    name:this.name,
+                    text:this.msgTextarea.value
+                }
+            );
+        },
+        onOpenSock(){
+
+        },
+        onMessage(msg){
+            let msgBlock = document.createElement("div");
+            msgBlock.className("msg");
+            let fromBlock = document.createElement("textarea");
+            fromBlock.className("from");
+            fromBlock.innerText = msg.name;
+            let textBlock = document.createElement("textarea");
+            textBlock.className("text");
+            textBlock.innerText = msg.name;
+
+            msgBlock.appendChild(fromBlock);
+            msgBlock.appendChild(textBlock);
+            this.chatContainer.appendChild(msgBlock);
+
+        },
+        onClose(){
+
+        },
+        sendMessage(msg){
+            this.ws.send(JSON.stringify(msg));
         },
         openSocket(){
             this.name.value=this.nameInput.value;
-            this.ws.onopen = ()=> this.onOpenSock();
+            this.ws.onmessage = ()=> this.onOpenSock();
+            this.ws.onmessage = (e)=>this.onMessage(JSON.parse(e.data));
+            this.ws.onclose = ()=>this.onClose();
            this.startbox.style.display="none";
            this.chatbox.style.display="block";
         }
