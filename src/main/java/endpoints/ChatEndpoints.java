@@ -13,11 +13,13 @@ package endpoints;
 @ServerEndpoint(value = "/chat",decoders = {MessageDecoder.class},encoders = {MessageEncoder.class})
 public class ChatEndpoints {
     private Session session=null;
+    public  static int counter = 0;
     private  static List<Session> sessionList = new LinkedList<>();
 
     @OnOpen
     public  void onOpen (Session session)
     {
+        counter++;
         this.session= session;
         sessionList.add(session);
     }
@@ -33,18 +35,29 @@ public class ChatEndpoints {
         throwable.printStackTrace();
     }
 
+//    @OnMessage
+//    public  void  onMessage(Session session, Message msg)
+//    {
+//        sessionList.forEach(s->{
+//            if(s==this.session) return;
+//            try {
+//                s.getBasicRemote().sendObject(msg);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } catch (EncodeException e) {
+//                e.printStackTrace();
+//            }
+//        });
+//    }
+
     @OnMessage
-    public  void  onMessage(Session session, Message msg)
+    public  void  onMessage(Session session,String str)
     {
-        sessionList.forEach(s->{
-            if(s==this.session) return;;
-            try {
-                s.getBasicRemote().sendObject(msg);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (EncodeException e) {
-                e.printStackTrace();
-            }
-        });
+        System.out.println("Session "+counter+" Message: "+str);
     }
+
+
+
+
+
 }
