@@ -53,7 +53,7 @@ public class ChatEndpoints {
     @OnMessage
     public  void  onMessage(Session session,String str) throws IOException {
 
-
+        session.getBasicRemote().sendText(str);
         for(int i = 0;i<sessionList.size();i++)
         {
             if(sessionList.get(i)==session)
