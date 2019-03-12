@@ -8,6 +8,7 @@ package endpoints;
         import javax.websocket.*;
         import javax.websocket.server.ServerEndpoint;
         import java.io.IOException;
+        import java.lang.reflect.InvocationTargetException;
         import java.util.ArrayList;
         import java.util.LinkedList;
         import java.util.List;
@@ -22,30 +23,38 @@ public class ChatEndpoints {
     public boolean isConnected=false;
 
 
+
     @OnOpen
     public  void onOpen (Session session)
     {
         this.session = session;
-        isConnected =true;
+        isConnected = true;
     }
 
     @OnClose
     public  void onClose(Session session)
     {
         generalChatSessionList.remove(this.session);
-        roomList.remove(index);
+        try {
+            roomList.remove(index);
+        }
+        catch (Exception e)
+        {
+            System.err.println("Room is deleted");
+        }
     }
     @OnError
     public  void onError (Session session,Throwable throwable)
     {
-        throwable.printStackTrace();
+        System.err.println("Session close");
     }
 
     @OnMessage
     public  void  onMessage(Session session, Message msg)
     {
 
-        if(isConnected==true) {
+        if(isConnected==true)
+        {
             System.out.println("Client "+session.getId());
             if (setChatType(msg).equals("general")) {
                 generalChatSessionList.add(this.session);
@@ -113,7 +122,7 @@ private void setClientToRoom()
             room.setStatus(true);
             roomList.add(room);
             index = roomList.size()-1;
-        System.out.println("Room create " + index);
+            System.out.println("Room create " + index);
     }
 
 
