@@ -1,6 +1,7 @@
 package endpoints;
 
         import clientObject.ConnectInfo;
+        import clientObject.InterlocutorInfo;
         import clientObject.UserInfo;
         import entities.Message;
         import room.Room;
@@ -53,9 +54,9 @@ public class ChatEndpoints {
     @OnMessage
     public  void  onMessage(Session session, String stringJson)
     {
-        System.out.println(stringJson);
+     //   System.out.println(stringJson);
 
-        System.out.println(objectInfo(stringJson));
+     //   System.out.println(objectInfo(stringJson));
 
         if (objectInfo(stringJson).toString().equals("UserInfo")) {
             UserInfo userInfo = new UserInfo();
@@ -71,6 +72,16 @@ public class ChatEndpoints {
             connectInfo = (ConnectInfo) ObjectType.getObject(stringJson, connectInfo);
             System.err.println("Chat type : "+connectInfo.getChatType());
         }
+
+        if (objectInfo(stringJson).toString().equals("InterlocutorInfo")) {
+            InterlocutorInfo interlocutorInfo = new InterlocutorInfo();
+            interlocutorInfo = (InterlocutorInfo)ObjectType.getObject(stringJson,interlocutorInfo);
+            System.err.println("Interlocutor Gender : "+interlocutorInfo.getGender());
+            System.err.println("InterlocutorInfo Age from  : "+interlocutorInfo.getAgeFrom());
+            System.err.println("InterlocutorInfo Age to : "+interlocutorInfo.getAgeTo());
+        }
+
+
 
 
 
