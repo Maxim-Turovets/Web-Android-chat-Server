@@ -1,223 +1,230 @@
-package endpoints;
+// section
+const connectInfo = document.querySelector(".container-form");
+const generalInfo = document.querySelector(".general-info");
+const userInfo = document.querySelector(".user-info");
+const interlocutorInfo = document.querySelector(".interlocutor-info");
+const contaonerMessage = document.querySelector(".container-messages");
+const loading = document.getElementById("loading");
+const messageSend =document.getElementById("message-send");
 
-        import clientObject.ChatCreated;
-        import clientObject.ConnectInfo;
-        import clientObject.InterlocutorInfo;
-        import clientObject.UserInfo;
-        import com.google.gson.Gson;
-        import person.Person;
-
-        import javax.websocket.*;
-        import javax.websocket.server.ServerEndpoint;
-        import java.io.IOException;
-        import java.util.ArrayList;
-
-        import objecttype.ObjectType;
-        import room.PairRoom;
-
-@ServerEndpoint(value = "/chat"/*,decoders = {MessageDecoder.class},encoders = {MessageEncoder.class}*/)
-public class ChatEndpoints {
-    private Session session=null;
-    //private  static List<Session> generalChatSessionList = new LinkedList<>();
-
-    // new variable
-    private Person person = new Person();
-    private static ArrayList<PairRoom> pairRoomArrayList= new ArrayList<>();
+// button
+const btnPrivate = document.getElementById("btnPrivate");
+const btnGeneral = document.getElementById("btnGeneral");
+const btnGeneralConnect = document.getElementById("btnGeneralConnect");
+const btnSend = document.getElementById("btnSend");
+const btnMale = document.getElementById("btnMale");
+const btnFemale = document.getElementById("btnFemale");
+const btnNext = document.getElementById("btnNext");
+const btnInterlocutorMale = document.getElementById("btnInterlocutorMale");
+const btnInterlocutorFemale = document.getElementById("btnInterlocutorFemale");
+const btnSearch = document.getElementById("btnSearch");
+//input
+const inpGeneralName = document.getElementById("inpGeneralName");
+const inpMessage = document.getElementById("inpMessage");
+const inpUserName = document.getElementById("inpUserName");
+const inpAge = document.getElementById("inpAge");
+const inpInterlocutorAgeFrom = document.getElementById("inpInterlocutorAgeFrom");
+const inpInterlocutorAgeTo = document.getElementById("inpInterlocutorAgeTo");
+const inpText = document.getElementById("inpText");
 
 
+const BtnGenChat = document.querySelector(".container-btn-general-chat");
+const BtnGirl = document.querySelector(".container-btn-im-girl");
+const BtnBoy = document.querySelector(".container-btn-im-boy");
+const name = document.querySelector(".input-name");
+const text = document.querySelector(".input-text");
+const con = new WebSocket("ws://77.47.224.135:8080/sock/chat");
+
+// json structure
+let UserInfo={
+    objectType:"UserInfo",
+    name:"",
+    gender:"",
+    age:"",
+    voiceMessage:false
+}
+
+let ConnectInfo={
+    objectType:"ConnectInfo",
+    chatType:""
+}
+
+let InterlocutorInfo={
+    objectType:"InterlocutorInfo",
+    gender:"",
+    ageFrom:"",
+    ageTo:""
+}
+
+let Message ={
+    objectType:"Message",
+    name:"",
+    text:""
+}
 
 
-    @OnOpen
-    public  void onOpen (Session session)
+
+btnSend.addEventListener("click", e => btnSendPress());
+btnGeneral.addEventListener("click", e => btnGenChatPress());
+btnPrivate.addEventListener("click", e => btnPrivatePress());
+btnGeneralConnect.addEventListener("click", e => btnGeneralConnectPress());
+btnMale.addEventListener("click", e => btnMalePress());
+btnFemale.addEventListener("click", e => btnFemalePress());
+btnNext.addEventListener("click", e => btnNextPress());
+btnInterlocutorMale.addEventListener("click", e => btnInterlocutorMalePress());
+btnInterlocutorFemale.addEventListener("click", e => btnInterlocutorFemalePress());
+btnSearch.addEventListener("click", e => btnSearchPress());
+
+// text.addEventListener("keyup", function (event) {
+//     event.preventDefault();
+//     if (event.keyCode === 13) {
+//         btnSendPress();
+//     }
+// });
+
+
+// const createOtherMessage = text => {
+//     let jsonRequest = JSON.parse(text);
+//     if (jsonRequest.text === "none" && jsonRequest.authkey === "general"&&jsonRequest.name!="none") {
+//         createAlertNewUser(jsonRequest.name);
+//     }
+//     else {
+//         const d = document.createElement('div');
+//         let html = "";
+//         html += "<div class=\"row\">";
+//         html += "<div class=\"col-12\">";
+//         if (jsonRequest.name === "") {
+//             html += "<div class=\"name float-left\">" + "Anonymous" + "</div>";
+//         } else {
+//             html += "<div class=\"name float-left\">" + jsonRequest.name + "</div>";
+//         }
+//         html += "</div></div>";
+//         html += "<div class=\"row\">";
+//         html += "<div class=\"col-sm-12\">";
+//         html += "<div class=\"other-messages float-left\" id=\"message-" + messageCount.toString() + "\">" + jsonRequest.text + "";
+//
+//         html += "</div></div>";
+//         d.innerHTML = html;
+//         document.querySelector(".container-messages").appendChild(d);
+//         let audio = new Audio('message.mp3');
+//         audio.volume = 1;
+//         audio.play();
+//     }
+//     document.location.href = "#message-" + messageCount.toString();
+// };
+
+con.onopen = () => {
+    console.log('connected');
+};
+con.onclose = () => {
+    console.log('closed');
+};
+
+con.onmessage = event => {
+   // console.log(event.data);
+    if(event.data==="created")
     {
-        this.session = session;
-        person.setSession(this.session);
-    }
-
-    @OnClose
-    public  void onClose(Session session)
-    {
-
+        loading.style.display="none";
+        interlocutorInfo.style.display="none";
+        contaonerMessage.style.display="block";
+        createAlertNewUser();
+        messageSend.style.display="block";
 
     }
-    @OnError
-    public  void onError (Session session,Throwable throwable)
-    {
-        //System.err.println("Session close");
-        System.out.println(throwable);
-    }
+    //createOtherMessage(event.data);
+};
 
-    @OnMessage
-    public  void  onMessage(Session session, String stringJson)
-    {
-        System.out.println(stringJson);
+function btnSendPress(qualifiedName, value) {
+    Message.name = UserInfo.name;
+    Message.text = inpText.value;
+    con.send(JSON.stringify(Message));
+    createMyMessage();
+}
 
-     //   System.out.println(objectInfo(stringJson));
+function btnGenChatPress(qualifiedName, value) {
+    ConnectInfo.chatType="general";
+    con.send(JSON.stringify(ConnectInfo));
+    connectInfo.style.display = "none";
+    generalInfo.style.display="block";
+}
 
-        ChatCreated chatCreated = new ChatCreated();
+function btnPrivatePress(qualifiedName, value) {
+       ConnectInfo.chatType="pair";
+       con.send(JSON.stringify(ConnectInfo));
+       connectInfo.style.display = "none";
+       userInfo.style.display="block";
+ }
 
 
-        if (objectInfo(stringJson).toString().equals("UserInfo")) {
-            UserInfo userInfo = new UserInfo();
-            userInfo = (UserInfo)ObjectType.getObject(stringJson,userInfo);
-            person.setName(userInfo.getName());
-            person.setAge(Integer.parseInt(userInfo.getAge()));
-            person.setGender(userInfo.getGender());
-            person.setVoiceMessage(userInfo.isVoiceMessage());
-        }
-
-        if(objectInfo(stringJson).toString().equals("ConnectInfo")) {
-            ConnectInfo connectInfo = new ConnectInfo();
-            connectInfo = (ConnectInfo) ObjectType.getObject(stringJson, connectInfo);
-            person.setChatType(connectInfo.getChatType());
-        }
-
-        if (objectInfo(stringJson).toString().equals("InterlocutorInfo")) {
-            InterlocutorInfo interlocutorInfo = new InterlocutorInfo();
-            interlocutorInfo = (InterlocutorInfo)ObjectType.getObject(stringJson,interlocutorInfo);
-            person.setInterlocutorGender(interlocutorInfo.getGender());
-            person.setInterlocutorAgeFrom(Integer.parseInt(interlocutorInfo.getAgeFrom()));
-            person.setInterlocutorAgeTo(Integer.parseInt(interlocutorInfo.getAgeTo()));
-            person.setCreated(true);
-        }
-
-        if(person.isCreated()) {
-            System.err.println(person.toString());
-            if(pairRoomArrayList.isEmpty())
-            {
-                PairRoom pairRoom = new PairRoom();
-                pairRoom.setOpen(true);
-                pairRoom.addPerson(person);
-                pairRoomArrayList.add(pairRoom);
-                System.err.println("ROOM CREATED");
-            }
-            else {
-                for(int i=0;i<pairRoomArrayList.size();i++)
-                {
-                  if( pairRoomArrayList.get(i).isOpen())
-                  {
-                      if(pairRoomArrayList.get(i).getPerson().getGender().equals(this.person.getInterlocutorGender()))
-                      {
-                          if(pairRoomArrayList.get(i).getPerson().getAge()>=this.person.getInterlocutorAgeFrom() && pairRoomArrayList.get(i).getPerson().getAge()<=this.person.getInterlocutorAgeTo())
-                          {
-                              if(this.person.getGender().equals(pairRoomArrayList.get(i).getPerson().getInterlocutorGender()))
-                              {
-                                  if(pairRoomArrayList.get(i).getPerson().getAge()>=this.person.getInterlocutorAgeFrom() && pairRoomArrayList.get(i).getPerson().getAge()<=this.person.getInterlocutorAgeTo())
-                                  {
-                                      pairRoomArrayList.get(i).addPerson(this.person);
-                                      pairRoomArrayList.get(i).setOpen(false);
-                                      System.err.println("Room is closed");
-                                      System.err.println("in room "+pairRoomArrayList.get(i).getPersonArrayList().get(0).getName()+" and "+pairRoomArrayList.get(i).getPersonArrayList().get(1).getName());
-                                      try {
-                                          pairRoomArrayList.get(i).getPersonArrayList().get(0).getSession().getBasicRemote().sendText("created");
-                                      } catch (IOException e) {
-                                          e.printStackTrace();
-                                      }
-                                      try {
-                                          pairRoomArrayList.get(i).getPersonArrayList().get(1).getSession().getBasicRemote().sendText("created");
-                                      } catch (IOException e) {
-                                          e.printStackTrace();
-                                      }
-                                      return;
-                                  }
-                                  else
-                                  {
-                                      PairRoom pairRoom = new PairRoom();
-                                      pairRoom.setOpen(true);
-                                      pairRoom.addPerson(person);
-                                      pairRoomArrayList.add(pairRoom);
-                                      System.err.println("ROOM CREATED 5");
-                                      return;
-                                  }
-                              }
-                              else
-                              {
-                                  PairRoom pairRoom = new PairRoom();
-                                  pairRoom.setOpen(true);
-                                  pairRoom.addPerson(person);
-                                  pairRoomArrayList.add(pairRoom);
-                                  System.err.println("ROOM CREATED 4");
-                                  return;
-                              }
-                          }
-                          else
-                          {
-                              PairRoom pairRoom = new PairRoom();
-                              pairRoom.setOpen(true);
-                              pairRoom.addPerson(person);
-                              pairRoomArrayList.add(pairRoom);
-                              System.err.println("ROOM CREATED 3");
-                              return;
-                          }
-                      }
-                      else
-                      {
-                          PairRoom pairRoom = new PairRoom();
-                          pairRoom.setOpen(true);
-                          pairRoom.addPerson(person);
-                          pairRoomArrayList.add(pairRoom);
-                          System.err.println("ROOM CREATED 2");
-                          return;
-                      }
-                  }
-                }
-            }
-        }
+function createMyMessage() {
+    const d = document.createElement('div');
+    let safetyMessage = text.value.replace(/[<]/g, "&lt");
+    let html = "";
+    html += "<div class=\"row\">";
+    html += "<div class=\"col-12\">";
+    html += "<div class=\"name float-right\">" + Message.name + "</div>";
+    html += "</div></div>";
+    html += "<div class=\"row\">";
+    html += "<div class=\"col-sm-12\">";
+    html += "<div class=\"my-messages float-right\" id=\"message-"+ "\">" + Message.text + "</div>";
+    html += "</div></div>";
+    d.innerHTML = html;
+    document.querySelector(".container-messages").appendChild(d);
+}
+//
+// function clearInput() {
+//     document.getElementById("text-input").value = "";
+// }
+//
+function createAlertNewUser() {
+    const d = document.createElement('div');
+    let html = "";
+    html += "<div class=\"row\">";
+    html += "<div class=\"col-sm-12\">";
+    html += "<div class=\"new-user text-center\" id=\"message-"  + "\">" + " joined the chat</div></div>";
+    html += "</div>";
+    d.innerHTML = html;
+    document.querySelector(".container-messages").appendChild(d);
+}
 
 
 
 
+function  btnGeneralConnectPress(){
+    generalInfo.style.display="none";
+    chatWindow.style.display="block";
+}
 
+function btnMalePress() {
+    UserInfo.gender="male";
+}
+function btnFemalePress() {
+    UserInfo.gender="female";
+}
 
+function btnVoiceMessagePress() {
+    UserInfo.voiceMessage=true;
+}
 
+function btnNextPress() {
+    UserInfo.name = inpUserName.value;
+    UserInfo.age = inpAge.value;
+    con.send(JSON.stringify(UserInfo));
+    userInfo.style.display="none";
+    interlocutorInfo.style.display="block";
+}
 
-
-
-
-    }
-
-
-//private void sendMessagesGeneralChat(Message message) // разослать в общем чате
-//{
-//    generalChatSessionList.forEach(s->{
-//        if(s==this.session) return;
-//        try {
-//            s.getBasicRemote().sendText(ObjectType.getJson(message));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    });
-//}
-
-
-    private StringBuffer objectInfo(String json){
-        StringBuffer returnJson = new StringBuffer();
-        int count =0;
-        for(int i=0;i<json.length();i++)
-        {
-            if(json.charAt(i)=='\"')
-            {
-                count++;
-            }
-            if (count==3){
-                returnJson.append(json.charAt(i));
-            }
-        }
-        returnJson.deleteCharAt(0);
-        return returnJson;
-    }
-
-
-    public   class СhatСreated {
-        public String getStringJson() {
-            return stringJson;
-        }
-
-        public void setStringJson(String stringJson) {
-            this.stringJson = stringJson;
-        }
-
-        private String stringJson = "created";
-    }
+function btnInterlocutorMalePress() {
+    InterlocutorInfo.gender ="male";
+}
+function btnInterlocutorFemalePress() {
+    InterlocutorInfo.gender ="female";
+}
+function btnSearchPress() {
+    InterlocutorInfo.ageFrom = inpInterlocutorAgeFrom.value;
+    InterlocutorInfo.ageTo = inpInterlocutorAgeTo.value;
+    con.send(JSON.stringify(InterlocutorInfo));
+    loading.style.display="block";
+    interlocutorInfo.style.display="none";
 
 }
