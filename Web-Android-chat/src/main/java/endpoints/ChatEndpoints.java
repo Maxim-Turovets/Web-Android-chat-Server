@@ -24,6 +24,7 @@ public class ChatEndpoints {
     private Person person = new Person();
     private static ArrayList<PairRoom> pairRoomArrayList= new ArrayList<>();
     public int roomIndex;
+    public boolean createRoom = false;
 
 
 
@@ -38,14 +39,13 @@ public class ChatEndpoints {
     @OnClose
     public  void onClose(Session session)
     {
-
-
+       System.err.println("Room "+roomIndex+" deleted");
+        pairRoomArrayList.remove(roomIndex);
     }
     @OnError
     public  void onError (Session session,Throwable throwable)
     {
-        //System.err.println("Session close");
-        System.out.println(throwable);
+        System.err.println(throwable);
     }
 
     @OnMessage
@@ -55,7 +55,7 @@ public class ChatEndpoints {
 
      //   System.out.println(objectInfo(stringJson));
 
-        ChatCreated chatCreated = new ChatCreated();
+
 
 
         if (objectInfo(stringJson).toString().equals("Message")) {
@@ -88,128 +88,13 @@ public class ChatEndpoints {
 
 
 
-        if(person.isCreated()) {
-            System.err.println(person.toString());
-            if(pairRoomArrayList.isEmpty())
-            {
-                PairRoom pairRoom = new PairRoom();
-                pairRoom.setOpen(true);
-                pairRoom.addPerson(person);
-                pairRoomArrayList.add(pairRoom);
-                roomIndex = 0;
-                System.err.println("ROOM CREATED");
-            }
-            else {
-                for(int i=0;i<pairRoomArrayList.size();i++)
-                {
-                  if( pairRoomArrayList.get(i).isOpen())
-                  {
-                      if(pairRoomArrayList.get(i).getPerson().getGender().equals(this.person.getInterlocutorGender()))
-                      {
-                          if(pairRoomArrayList.get(i).getPerson().getAge()>=this.person.getInterlocutorAgeFrom() && pairRoomArrayList.get(i).getPerson().getAge()<=this.person.getInterlocutorAgeTo())
-                          {
-                              if(this.person.getGender().equals(pairRoomArrayList.get(i).getPerson().getInterlocutorGender()))
-                              {
-                                  if(pairRoomArrayList.get(i).getPerson().getAge()>=this.person.getInterlocutorAgeFrom() && pairRoomArrayList.get(i).getPerson().getAge()<=this.person.getInterlocutorAgeTo())
-                                  {
-                                      pairRoomArrayList.get(i).addPerson(this.person);
-                                      pairRoomArrayList.get(i).setOpen(false);
-                                      System.err.println("Room is closed");
-                                      System.err.println("in room "+pairRoomArrayList.get(i).getPersonArrayList().get(0).getName()+" and "+pairRoomArrayList.get(i).getPersonArrayList().get(1).getName());
-                                      try {
-                                          pairRoomArrayList.get(i).getPersonArrayList().get(0).getSession().getBasicRemote().sendText("created");
-                                      } catch (IOException e) {
-                                          e.printStackTrace();
-                                      }
-                                      try {
-                                          pairRoomArrayList.get(i).getPersonArrayList().get(1).getSession().getBasicRemote().sendText("created");
-                                      } catch (IOException e) {
-                                          e.printStackTrace();
-                                      }
-                                      return;
-                                  }
-                                  else if(i==pairRoomArrayList.size()-1)
-                                  {
-                                      PairRoom pairRoom = new PairRoom();
-                                      pairRoom.setOpen(true);
-                                      pairRoom.addPerson(person);
-                                      pairRoomArrayList.add(pairRoom);
-                                      System.err.println("ROOM CREATED 5");
-                                      roomIndex = i;
-                                      return;
-                                  }
-                              }
-                              else if(i==pairRoomArrayList.size()-1)
-                              {
-                                  PairRoom pairRoom = new PairRoom();
-                                  pairRoom.setOpen(true);
-                                  pairRoom.addPerson(person);
-                                  pairRoomArrayList.add(pairRoom);
-                                  System.err.println("ROOM CREATED 4");
-                                  roomIndex = i;
-                                  return;
-                              }
-                          }
-                          else if(i==pairRoomArrayList.size()-1)
-                          {
-                              PairRoom pairRoom = new PairRoom();
-                              pairRoom.setOpen(true);
-                              pairRoom.addPerson(person);
-                              pairRoomArrayList.add(pairRoom);
-                              System.err.println("ROOM CREATED 3");
-                              roomIndex = i;
-                              return;
-                          }
-                      }
-                      else if(i==pairRoomArrayList.size()-1)
-                      {
-                          PairRoom pairRoom = new PairRoom();
-                          pairRoom.setOpen(true);
-                          pairRoom.addPerson(person);
-                          pairRoomArrayList.add(pairRoom);
-                          System.err.println("ROOM CREATED 2");
-                          roomIndex = i;
-                          return;
-                      }
-                  }
-                  else if(i==pairRoomArrayList.size()-1)
-                  {
-                      PairRoom pairRoom = new PairRoom();
-                      pairRoom.setOpen(true);
-                      pairRoom.addPerson(person);
-                      pairRoomArrayList.add(pairRoom);
-                      System.err.println("ROOM CREATED 6");
-                      roomIndex = i;
-                      return;
-                  }
-                }
-            }
+        if(person.isCreated()&& createRoom==false) {
+            createOrJoinInRoom();
+            createRoom = true;
         }
-
-
-
-
-
-
-
-
-
-
 
     }
 
-
-//private void sendMessagesGeneralChat(Message message) // разослать в общем чате
-//{
-//    generalChatSessionList.forEach(s->{
-//        if(s==this.session) return;
-//        try {
-//            s.getBasicRemote().sendText(ObjectType.getJson(message));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    });
-//}
 
 
     private StringBuffer objectInfo(String json){
@@ -230,22 +115,11 @@ public class ChatEndpoints {
     }
 
 
-    public   class СhatСreated {
-        public String getStringJson() {
-            return stringJson;
-        }
-
-        public void setStringJson(String stringJson) {
-            this.stringJson = stringJson;
-        }
-
-        private String stringJson = "created";
-    }
 
 
     private void sendInPairChat(PairRoom room,String message)
     {
-            room.getPersonArrayList().forEach(s->{
+        room.getPersonArrayList().forEach(s->{
         if(s==person) return;
         try {
             s.getSession().getBasicRemote().sendText(message);
@@ -254,6 +128,88 @@ public class ChatEndpoints {
         }
     });
     }
+
+    private void createOrJoinInRoom()
+    {
+        System.err.println(person.toString());
+        if(pairRoomArrayList.isEmpty())
+        {
+            create(0);
+        }
+        else {
+            for(int i=0;i<pairRoomArrayList.size();i++)
+            {
+                Person localPerson = pairRoomArrayList.get(i).getPerson();
+                PairRoom localRoom = pairRoomArrayList.get(i);
+                if(localRoom.isOpen())
+                {
+                    if(localPerson.getGender().equals(this.person.getInterlocutorGender()))
+                    {
+                        if(localPerson.getAge()>=this.person.getInterlocutorAgeFrom() && localPerson.getAge()<=this.person.getInterlocutorAgeTo())
+                        {
+                            if(this.person.getGender().equals(localPerson.getInterlocutorGender()))
+                            {
+                                if(this.person.getAge()>=localPerson.getInterlocutorAgeFrom()&&this.person.getAge()<=localPerson.getInterlocutorAgeTo())
+                                {
+                                    pairRoomArrayList.get(i).addPerson(this.person);
+                                    pairRoomArrayList.get(i).setOpen(false);
+                                    System.err.println("Room is closed");
+                                    System.err.println("in room "+pairRoomArrayList.get(i).getPersonArrayList().get(0).getName()+" and "+pairRoomArrayList.get(i).getPersonArrayList().get(1).getName());
+                                    try {
+                                        pairRoomArrayList.get(i).getPersonArrayList().get(0).getSession().getBasicRemote().sendText("created");
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    try {
+                                        pairRoomArrayList.get(i).getPersonArrayList().get(1).getSession().getBasicRemote().sendText("created");
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    return;
+                                }
+                                else if(i==pairRoomArrayList.size()-1)
+                                {
+                                    create(i);
+                                    return;
+                                }
+                            }
+                            else if(i==pairRoomArrayList.size()-1)
+                            {
+                                create(i);
+                                return;
+                            }
+                        }
+                        else if(i==pairRoomArrayList.size()-1)
+                        {
+                            create(i);
+                            return;
+                        }
+                    }
+                    else if(i==pairRoomArrayList.size()-1)
+                    {
+                        create(i);
+                        return;
+                    }
+                }
+                else if(i==pairRoomArrayList.size()-1)
+                {
+                    create(i);
+                    return;
+                }
+            }
+        }
+        createRoom = true;
+    }
+
+    private void create(int index){
+        PairRoom pairRoom = new PairRoom();
+        pairRoom.setOpen(true);
+        pairRoom.addPerson(this.person);
+        pairRoomArrayList.add(pairRoom);
+        roomIndex = index;
+        System.err.println("ROOM CREATED index "+ index);
+    }
+
 
 
 }
